@@ -235,7 +235,6 @@ services:
     restart: unless-stopped
     ports:
       - "5555:5555/udp"
-      - "5044:5044"
       - "9600:9600"
     volumes:
       - "./logstash/:/usr/share/logstash/pipeline/"
