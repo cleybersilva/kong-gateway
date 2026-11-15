@@ -1,0 +1,26 @@
+# Kong declarative configuration (versioned source of truth for services and routes).
+# Generated from `kong config db_export`, trimmed of instance-specific fields
+# (cluster_id, timestamps). Applied to the Postgres database on every
+# `docker-compose up` by the kong-config service (`kong config db_import`).
+# IDs are fixed so re-importing updates the same entities instead of duplicating them.
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: fastapi-app
+    id: 51068cc6-0b96-43c0-9fb2-8ffada67e0fd
+    url: http://fastapi-app:5000
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    routes:
+      - name: fastapi-route
+        id: d63f964d-529e-479e-9c91-23b88a559092
+        paths:
+          - /fastapi
+        strip_path: true
+        preserve_host: false
+        protocols:
+          - http
+          - https
