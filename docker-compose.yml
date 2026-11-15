@@ -192,6 +192,7 @@ services:
       - "./logstash/:/usr/share/logstash/pipeline/"
     environment:
       - MONITORING_ENABLED=false
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-}
     networks:
       kong-net:
         ipv4_address: 172.1.1.23
