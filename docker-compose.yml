@@ -47,6 +47,22 @@ services:
     depends_on:
       - kong-database
 
+  kong-config:
+    image: kong:3.7.1
+    command: kong config db_import /kong/kong.yml
+    environment:
+      <<: *kong-env
+    volumes:
+      - ./kong:/kong:ro
+    networks:
+      - kong-net
+    restart: on-failure
+    depends_on:
+      kong-database:
+        condition: service_healthy
+      kong-migrations:
+        condition: service_completed_successfully
+
   kong:
     image: kong:3.7.1
     user: "${KONG_USER:-kong}"
@@ -79,6 +95,13 @@ services:
     volumes:
       - kong_prefix_vol:${KONG_PREFIX:-/var/run/kong}
       - kong_tmp_vol:/tmp
+      # Custom plugin and kong.conf (plugins = bundled, mandate_header) mounted instead of docker cp,
+      # so they survive container re-creation
+      - ./mandate_header:/usr/local/share/lua/5.1/kong/plugins/mandate_header:ro
+      - ./kong.conf:/etc/kong/kong.conf:ro
+    depends_on:
+      kong-config:
+        condition: service_completed_successfully
     security_opt:
       - no-new-privileges
 
