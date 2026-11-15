@@ -213,3 +213,12 @@ services:
       - "3000:3000"
     networks:
       - kong-net
+
+  fastapi-app:
+    build: .
+    container_name: fastapi-app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    networks:
+      - kong-net
