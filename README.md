@@ -30,6 +30,22 @@ For easy installation and setup run a single command below.
  docker-compose up -d --build
 ```
 
+## Ports
+
+| Port | Service | Notes |
+|---|---|---|
+| 5432 | PostgreSQL (Kong database) | Bound to `127.0.0.1`. Stop any local PostgreSQL first |
+| 5051 | PgAdmin 4 (`http://localhost:5051`) | The course uses 5050, but on Windows 5050 is taken by the Connected Devices Platform service (CDPSvc). Override with `PGADMIN_PORT` in `.env`. The "Kong Database" server is preloaded (password `mykongpassword`) |
+| 8000 / 8443 | Kong proxy (HTTP / HTTPS) | |
+| 8001 | Kong Admin API | Bound to `127.0.0.1` |
+| 8002 | Kong Manager | Bound to `127.0.0.1` |
+| 5000 | FastAPI app | |
+| 9411 | Zipkin | Optional (distributed tracing lesson) |
+| 9200, 9600, 5555/udp, 5601 | Elasticsearch, Logstash, Kibana | Optional (API analytics lesson) |
+
+PgAdmin needs `PGADMIN_DEFAULT_PASSWORD` in `.env` (see `.env.example`); log in with `PGADMIN_DEFAULT_EMAIL`
+(default `admin@example.com`).
+
 ## Datadog metrics (DD_API_KEY)
 
 Kong's bundled `datadog` plugin is enabled on the `fastapi-route` route (service `fastapi-app`) in

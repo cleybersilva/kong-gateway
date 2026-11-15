@@ -8,6 +8,7 @@ x-kong-config:
 
 volumes:
   kong_data: {}
+  pgadmin_data: {}
   kong_prefix_vol:
     driver_opts:
       type: tmpfs
@@ -140,10 +141,35 @@ services:
     restart: unless-stopped
     stdin_open: true
     tty: true
+    # Published for the course (psql, PgAdmin, DB clients on the host); bound to localhost only
+    ports:
+      - "127.0.0.1:5432:5432"
     networks:
       - kong-net
     volumes:
       - kong_data:/var/lib/postgresql/data
+
+  # PgAdmin 4 UI for the Kong Postgres database.
+  # Host port 5051 instead of the course's 5050: on Windows, 5050 is taken by the
+  # Connected Devices Platform service (CDPSvc). Change PGADMIN_PORT in .env if needed.
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "127.0.0.1:${PGADMIN_PORT:-5051}:80"
+    volumes:
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - kong-database
+    networks:
+      - kong-net
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -213,6 +239,8 @@ services:
       - "9600:9600"
     volumes:
       - "./logstash/:/usr/share/logstash/pipeline/"
+      # Elasticsearch CA exported to the project folder (README.txt, step III.3); git-ignored
+      - "./http_ca.crt:/usr/share/logstash/certs/http_ca.crt:ro"
     environment:
       - MONITORING_ENABLED=false
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-}

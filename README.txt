@@ -91,17 +91,9 @@ Run the following steps from terminal:
 
    Make sure on your local folder, there is a file http_ca.crt
 
-4. Create the directory in the logstash container to store the certificate
+4. Restart the logstash container. docker-compose.yml mounts ./http_ca.crt read-only at
+   /usr/share/logstash/certs/http_ca.crt, so there is no need to copy it into the container,
+   and it survives container re-creation.
 
-   #> docker exec -it logstash mkdir -p /usr/share/logstash/certs
-
-5. Copy the crt file to logstash container 
-
-   #> docker cp http_ca.crt logstash:/usr/share/logstash/certs/
-   ...
-   Successfully copied xxxkB to logstash:/usr/share/logstash/cert/
-
-6. restart the docker logstash container
-   
-   #> docker restart logstash
+   #> docker compose up -d logstash
 
