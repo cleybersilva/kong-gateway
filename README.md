@@ -30,6 +30,56 @@ For easy installation and setup run a single command below.
  docker-compose up -d --build
 ```
 
+## Datadog metrics (DD_API_KEY)
+
+Kong's bundled `datadog` plugin is enabled on the `fastapi-route` route (service `fastapi-app`) in
+`kong/kong.yml`. It sends DogStatsD metrics (`kong.request.count`, `kong.latency`,
+`kong.upstream_latency`, `kong.kong_latency`, `kong.request.size`, `kong.response.size`, tagged with
+the service name and status) to the `datadog-agent` container, which forwards them to Datadog.
+Traffic on other routes is not reported.
+
+The agent needs your Datadog API key. It is read from a local `.env` file, which is git-ignored and
+must never be committed.
+
+1. Create the `.env` file from the template, if you do not have one yet:
+
+   ```sh
+   cp .env.example .env
+   ```
+
+   On Windows PowerShell: `Copy-Item .env.example .env`
+
+2. Get an API key in Datadog: **Organization Settings > API Keys** (an API key, not an application key).
+
+3. Fill in the Datadog variables in `.env`:
+
+   ```sh
+   DD_API_KEY=<your-api-key>
+   DD_SITE=datadoghq.com
+   ```
+
+   `DD_SITE` must match the site your Datadog account uses: `datadoghq.com` (US1),
+   `us3.datadoghq.com`, `us5.datadoghq.com`, `datadoghq.eu` or `ap1.datadoghq.com`.
+   With the wrong site the key is rejected.
+
+4. Start (or re-create) the agent so it reads the new values:
+
+   ```sh
+   docker compose up -d --force-recreate datadog-agent
+   ```
+
+5. Check that the key was accepted and metrics are flowing:
+
+   ```sh
+   docker exec datadog-agent agent status
+   ```
+
+   In the output, **API Keys status** must show the key as valid, and the **DogStatsD** section must
+   count received packets after you send requests to `http://localhost:8000/fastapi/healthy`.
+   In Datadog, the metrics appear under the `kong.` prefix, host `kong-gateway-local`.
+
+Without `DD_API_KEY` the agent exits and Docker keeps restarting it; the rest of the stack is not affected.
+
 ----------
 
 ## Prepare the database

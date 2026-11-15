@@ -24,12 +24,11 @@ services:
         protocols:
           - http
           - https
-
-# Global plugins (apply to every service and route)
-plugins:
-  - name: datadog
-    id: 7d0a3c1e-5b2f-4c8e-9a61-2f4b8d3e6c10
-    config:
-      host: datadog-agent
-      port: 8125
-      prefix: kong
+        plugins:
+          # Datadog metrics only for traffic on this route (DogStatsD to the datadog-agent service)
+          - name: datadog
+            id: 7d0a3c1e-5b2f-4c8e-9a61-2f4b8d3e6c10
+            config:
+              host: datadog-agent
+              port: 8125
+              prefix: kong
