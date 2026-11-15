@@ -237,6 +237,23 @@ services:
     networks:
       - kong-net
 
+  # Receives DogStatsD metrics from Kong's datadog plugin (UDP 8125) and forwards them to Datadog.
+  # Needs DD_API_KEY in the local .env file; DD_SITE defaults to the US1 site.
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7
+    container_name: datadog-agent
+    restart: unless-stopped
+    environment:
+      DD_API_KEY: ${DD_API_KEY:-}
+      DD_SITE: ${DD_SITE:-datadoghq.com}
+      DD_HOSTNAME: kong-gateway-local
+      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
+      DD_LOGS_ENABLED: "false"
+      DD_APM_ENABLED: "false"
+      DD_PROCESS_AGENT_ENABLED: "false"
+    networks:
+      - kong-net
+
   fastapi-app:
     build: .
     container_name: fastapi-app
