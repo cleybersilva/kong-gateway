@@ -230,7 +230,11 @@ services:
         ipv4_address: 172.1.1.22
 
   logstash:
-    image: logstash:8.11.3
+    # 8.17.0 instead of 8.11.x: on 8.11 (Puma 6.4.1) a pipeline with the udp input makes the
+    # monitoring API on 9600 accept connections and close them with an empty reply. Reproduced in a
+    # clean container (udp input fails, tcp input works); 8.17.0 (Puma 6.4.3) works with udp.
+    # Logstash 8.17 writes to the Elasticsearch 8.11 cluster without changes.
+    image: logstash:8.17.0
     container_name: logstash
     restart: unless-stopped
     ports:
