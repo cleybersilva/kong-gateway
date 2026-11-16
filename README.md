@@ -46,7 +46,7 @@ For easy installation and setup run a single command below.
 PgAdmin needs `PGADMIN_DEFAULT_PASSWORD` in `.env` (see `.env.example`); log in with `PGADMIN_DEFAULT_EMAIL`
 (default `admin@example.com`).
 
-## Datadog metrics (DD_API_KEY)
+## Datadog metrics (KONG_DD_API_KEY)
 
 Kong's bundled `datadog` plugin is enabled on the `fastapi-route` route (service `fastapi-app`) in
 `kong/kong.yml`. It sends DogStatsD metrics (`kong.request.count`, `kong.latency`,
@@ -70,13 +70,19 @@ must never be committed.
 3. Fill in the Datadog variables in `.env`:
 
    ```sh
-   DD_API_KEY=<your-api-key>
-   DD_SITE=datadoghq.com
+   KONG_DD_API_KEY=<your-api-key>
+   KONG_DD_SITE=datadoghq.com
    ```
 
-   `DD_SITE` must match the site your Datadog account uses: `datadoghq.com` (US1),
+   `KONG_DD_SITE` must match the site your Datadog account uses: `datadoghq.com` (US1),
    `us3.datadoghq.com`, `us5.datadoghq.com`, `datadoghq.eu` or `ap1.datadoghq.com`.
-   With the wrong site the key is rejected.
+   With the wrong site the key is rejected. To find it, the site where
+   `curl -H "DD-API-KEY: <key>" https://api.<site>/api/v1/validate` returns `{"valid":true}` is yours.
+
+   The names carry the `KONG_` prefix on purpose: Docker Compose gives variables already set in your
+   shell or operating system precedence over `.env`, so a `DD_API_KEY` defined on the machine for
+   another Datadog integration would silently replace the one in `.env`. Compose passes these values
+   to the agent as `DD_API_KEY` and `DD_SITE`.
 
 4. Start (or re-create) the agent so it reads the new values:
 
@@ -94,7 +100,7 @@ must never be committed.
    count received packets after you send requests to `http://localhost:8000/fastapi/healthy`.
    In Datadog, the metrics appear under the `kong.` prefix, host `kong-gateway-local`.
 
-Without `DD_API_KEY` the agent exits and Docker keeps restarting it; the rest of the stack is not affected.
+Without `KONG_DD_API_KEY` the agent exits and Docker keeps restarting it; the rest of the stack is not affected.
 
 ----------
 
